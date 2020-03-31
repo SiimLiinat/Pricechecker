@@ -13,10 +13,12 @@ https://hinnavaatlus.ee price tracker.
 # TODO Plot multiple items at the same time
 
 from datetime import datetime
+import matplotlib.dates as mdates
 import bs4
 import json
 import matplotlib.pyplot as plt
 import requests
+from pandas.plotting import register_matplotlib_converters
 
 webpages = {"https://www.hinnavaatlus.ee/search/?query=ryzen+3600&min_price=&max_price=": 200,
             "https://www.hinnavaatlus.ee/products/Arvutikomponendid/Videokaardid/6c1d391955a7127779cba8cb35a29175"
@@ -38,7 +40,7 @@ def get_price(url: str):
 
 def save_data(item, cost):
     """Save item name, cost and current time in JSON format to .txt file."""
-    py_data = [item, cost, datetime.now().strftime("%Y/%m/%d")]
+    py_data = [item, cost, datetime.now().strftime("%Y-%m-%d")]
     data = json.dumps(py_data)
     with open("collected_data.txt", "a") as f:
         json.dump(data, f)
@@ -53,23 +55,30 @@ def get_data():
 
 
 def plot_graph():
-    #data = get_data()
-    #plt.plot()
-    #for site in webpages:
-    #    name, price = get_price(site)
-    #    item_data = list(filter(lambda x: x[0] == name, data))
-    #    name_1, price, date = [*zip(*item_data)]
-    #    plt.plot(date, price, label=name)
-    #plt.legend()
-    #plt.show()
+    # data = get_data()
+    # plt.plot()
+    # for site in webpages:
+    #     name, price = get_price(site)
+    #     item_data = list(filter(lambda x: x[0] == name, data))
+    #     name_1, price, date = [*zip(*item_data)]
+    #     plt.plot(date, price, label=name)
+    # plt.legend()
+    # plt.show()
 
+    register_matplotlib_converters()  # otherwise FutureWaring
     data = get_data()
-    names = set(x[0] for x in data)
-    (names)  # graph brakes without mentioning names
+    names = sorted(list(set(x[0] for x in data)))  # unordered sets cause chaos
+    fig, ax = plt.subplots()
     for name in names:
         item_data = list(filter(lambda x: x[0] == name, data))
         name_1, price, date = [*zip(*item_data)]
-        plt.plot(date, price, label=name)
+        date = [datetime.strptime(x, "%Y-%m-%d") for x in date]
+        ax.plot(date, price, label=name)
+    fig.autofmt_xdate()
+    ax.xaxis_date()
+    ax.xaxis.set_major_formatter(mdates.DateFormatter('%m-%d'))
+    plt.xlabel("Dates")
+    plt.ylabel("Prices (€)")
     plt.legend()
     plt.show()
 
