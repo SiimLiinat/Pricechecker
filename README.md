@@ -1,3 +1,3 @@
-# Personal-Projects
+# Price Tracker
 
-Projects I've made for my own personal use. Currently only includes a rudimentary price checker for checking items available on hv.ee
+A rudimentary price tracker for checking and logging prices of PC components on hv.ee
